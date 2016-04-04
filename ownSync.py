@@ -17,7 +17,7 @@ if __name__ == "__main__":
   parser.add_argument('--local', help='local path to sync into', type=str, required=True)
   parser.add_argument('--rpath', help='remote path to sync into (Default: /)', type=str, required=False, default = "/")
   parser.add_argument('--disable-ssl', action=store_true, default=False, help="Don't check TLS/SSL certs (warning: dumb)")
-  parser.add_argument('--type', help=t, required=False)
+  parser.add_argument('--type', default='both', help=t, required=False)
   Args = vars(parser.parse_args(sys.argv))
 
   print "Checking URL...  ",
@@ -38,9 +38,8 @@ if __name__ == "__main__":
   X = ownClient(Args['url'], disable_ssl=Args['disable-ssl'])
   X.set_auth(Args['user'], Args['pass'])
 
-  if Args['type'] == None or Args['type'].lower() == "both":
-    X.syncBOTH(Args['local'], base=Args['rpath'])
-  elif Args['type'].lower() == "to":
-    X.syncTO(Args['local'], base=Args['rpath'])
-  elif Args['type'].lower() == "from":
-    X.syncFROM(Args['local'], base=Args['rpath'])
+  {
+    'both': X.syncBOTH,
+    'to': X.syncTO,
+    'from': X.syncFROM
+  }[Args['type'].lower()](Args['local'], base=Args['rpath'])
