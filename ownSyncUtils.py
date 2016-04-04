@@ -2,7 +2,7 @@
 """
 ownSync is a module used to sync files to/from ownCloud.
 """
-from __future__ import print_function
+from __future__ import print_function, with_statement, absolute_import, division
 
 import httplib2
 import os
@@ -12,10 +12,10 @@ import time
 import logging
 import datetime
 import xml.etree.ElementTree as ET
-if sys.version_info > (2,):
-    import urllib.parse as urllibparse
-else:
+if sys.version_info < (3,):
     import urllib as urllibparse
+else:
+    import urllib.parse as urllibparse
 
 class ownClient():
 
@@ -132,10 +132,11 @@ class ownClient():
     that file name will be used as its name.
     """
     self.log.debug("Adding New File: %s/%s"%(path, os.path.basename(newFile)))
-    fp = open(newFile, "r")
-    if path not in self.DIRS:
-      self.mkdir(path)
-    r, c = self.http.request(self.url+"/%s/%s"%(urllibparse.quote(path), urllibparse.quote(os.path.basename(newFile))), "PUT", body=fp.read())
+    with open(newFile, "rb") as fp:
+    #fp = open(newFile, "r")
+      if path not in self.DIRS:
+        self.mkdir(path)
+      r, c = self.http.request(self.url+"/%s/%s"%(urllibparse.quote(path), urllibparse.quote(os.path.basename(newFile))), "PUT", body=fp.read())
 
   def getLocalDIRS(self, path):
     DIRS = dict()
@@ -203,11 +204,15 @@ class ownClient():
           if newfile in FILES:
             if self.FILES[f]['lastMod'] > FILES[newfile]['lastMod']:
               self.log.info("Downloading Updated file %s"%(f))
-              open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
+              with open(os.path.join(path, newfile), "wb") as O:
+                  O.write(self.getFile(f))
+              #open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
               os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
           else:
             self.log.info("Downloading new file %s"%(f))
-            open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
+            with open(os.path.join(path, newfile), "wb") as O:
+              O.write(self.getFile(f))
+            # open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
             os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
       self.updateTree(path=base)
 
@@ -284,11 +289,15 @@ class ownClient():
           newfile = fixPath(f[len(base):])
           if newfile not in FILES:
             self.log.info("Creating New file %s"%(f))
-            open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
+            with open(os.path.join(path, newfile), "wb") as O:
+              O.write(self.getFile(f))
+            # open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
             os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
           elif FILES[newfile]['lastMod'] != self.FILES[f]['lastMod']:
             self.log.info("Downloading Updated file %s"%(f))
-            open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
+            with open(os.path.join(path, newfile), "wb") as O:
+              O.write(self.getFile(f))
+            #open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
             os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
 
       for f in FILES:
