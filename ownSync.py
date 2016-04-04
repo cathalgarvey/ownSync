@@ -13,8 +13,8 @@ if __name__ == "__main__":
   parser.add_argument('--pass', help='Password to use to connect (will be prompted if omitted)', type=str, default=None)
   parser.add_argument('--local', help='local path to sync into', type=str, required=True)
   parser.add_argument('--rpath', help='remote path to sync into (Default: /)', type=str, required=False, default = "/")
-  parser.add_argument('--disable-ssl', action=store_true, default=False, help="Don't check TLS/SSL certs (warning: dumb)")
-  parser.add_argument('--type', default='both', help=t, required=False)
+  parser.add_argument('--disable-ssl', action="store_true", default=False, help="Don't check TLS/SSL certs (warning: dumb)")
+  parser.add_argument('--type', type=str, default='both', help=t)
   Args = vars(parser.parse_args())
 
   print "Checking URL...  ",
