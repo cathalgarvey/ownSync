@@ -12,14 +12,14 @@ class ownClient():
   ownClient main class for the ownSync utility, it makes a connection to the ownCloud
   server and then allows modification and retrival of files.
   """
-  def __init__(self, url):
+  def __init__(self, url, disable_ssl=False):
     """
     The URL in http or https format to the owncloud server, the remote.php/webdav is required
     """
     self.log = logging.getLogger("root.ownClient")
     self.url = url
     self.base = "/".join(url[8:].split("/")[1:])
-    self.http = httplib2.Http(disable_ssl_certificate_validation=True)
+    self.http = httplib2.Http(disable_ssl_certificate_validation=disable_ssl)
     self.good = False
     self.DIRS = dict()
     self.FILES = dict()
@@ -97,7 +97,7 @@ class ownClient():
     """
     self.log.debug("Creating Path %s"%(path))
     r, c = self.http.request(self.url+"/"+urllib.quote(path), "MKCOL")
-    
+
 
   def delete(self, path):
     """
@@ -117,7 +117,7 @@ class ownClient():
 
   def addFile(self, newFile, path):
     """
-    This adds the given file to the owncloud server.  newFile is a string path to a local file and 
+    This adds the given file to the owncloud server.  newFile is a string path to a local file and
     that file name will be used as its name.
     """
     self.log.debug("Adding New File: %s/%s"%(path, os.path.basename(newFile)))
@@ -171,7 +171,7 @@ class ownClient():
               os.makedirs("%s/%s"%(path,newpath))
             except Exception as e:
               pass
-      
+
       for f in FILES:
         newfile = fixPath("%s/%s"%(base,f))
         if newfile in self.FILES:
@@ -231,7 +231,7 @@ class ownClient():
           self.addFile("%s/%s"%(path,f), fixPath(os.path.dirname(newfile)+"/"))
           self.updateModTime(newfile, FILES[f]['lastMod']/1000)
 
-      
+
       for f in self.FILES:
         if f[:len(base)] == base:
           newfile = fixPath(f[len(base):])
@@ -265,7 +265,7 @@ class ownClient():
             except Exception as e:
               pass
 
-          
+
       FILES = self.getLocalFILES(path)
 
       for f in self.FILES:
