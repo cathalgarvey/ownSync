@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 if __name__ == "__main__":
   import ownSyncUtils as ownsyncutils
@@ -17,13 +18,13 @@ if __name__ == "__main__":
   parser.add_argument('--type', type=str, default='both', help=t)
   Args = vars(parser.parse_args())
 
-  print "Checking URL...  ",
+  print("Checking URL...")
   Args['url'] = ownsyncutils.getOwn(Args['url'])
   if Args['url'] == None:
-    print "Problem with URL!"
+    print("Problem with URL!")
     sys.exit(1)
   else:
-    print "GOOD: %s"%(Args['url'])
+    print("GOOD:", Args['url'])
 
   if Args['pass'] is None:
     Args['pass'] = getpass.getpass("Password: ")

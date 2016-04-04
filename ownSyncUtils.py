@@ -1,10 +1,18 @@
-import httplib2, os, shutil
-import urllib, time, logging, datetime
-import xml.etree.ElementTree as ET
-
+#!/usr/bin/env python
 """
 ownSync is a module used to sync files to/from ownCloud.
 """
+from __future__ import print_function
+
+import httplib2
+import os
+import shutil
+import urllib
+import time
+import logging
+import datetime
+import xml.etree.ElementTree as ET
+
 
 class ownClient():
 
