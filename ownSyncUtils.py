@@ -11,6 +11,7 @@ import shutil
 import time
 import logging
 import datetime
+import json
 import xml.etree.ElementTree as ET
 if sys.version_info < (3,):
     import urllib as urllibparse
@@ -46,13 +47,22 @@ class ownClient():
     Updates the Local dictionary of directories and files
     """
     self.log.debug("updating Local DataTrees %s"%path)
-    DATA = "<?xml version='1.0' encoding='UTF-8' ?><propfind xmlns:D='DAV:'><prop><D:allprop/></prop></propfind>"
-    r, c = self.http.request(self.url+"/"+path, 'PROPFIND', body=DATA)
+    DATA = """<?xml version='1.0' encoding='UTF-8' ?>
+        <d:propfind xmlns:d='DAV:'>
+            <d:prop>
+                <d:allprop/>
+            </d:prop>
+        </d:propfind>"""
+    targetUrl = self.url+"/"+urllibparse.quote(path)
+    self.log.debug("Issuing request: {}".format(targetUrl))
+    r, c = self.http.request(targetUrl, 'PROPFIND', body=DATA)
     if r['status'] != '207':
+      self.log.error("Received non-207, aborting tree update: r={}\nc={}".format(json.dumps(r,indent=1), c))
       self.good = False
       return
     self.good = True
     obj = ET.XML(c)
+    self.log.debug("XML updateTree object: {}".format(obj))
     if obj.tag != "{DAV:}multistatus":
       return
     for i in obj.getchildren():
@@ -109,7 +119,6 @@ class ownClient():
     self.log.debug("Creating Path %s"%(path))
     r, c = self.http.request(self.url+"/"+urllibparse.quote(path), "MKCOL")
 
-
   def delete(self, path):
     """
     delete deletes any path/file on the owncloud server, and will do so recursivly.
@@ -119,7 +128,7 @@ class ownClient():
 
   def getFile(self, path): #->(bytes)
     """
-    getFile retireves the contents of the give file
+    getFile retrieves the contents of the give file
     """
     self.log.debug("Getting File contents: %s"%(path))
     r, c = self.http.request(self.url+"/"+urllibparse.quote(path))
@@ -321,11 +330,15 @@ def fixPath(path):
   return path
 
 
-def getOwn(url):
+def getOwn(url, disable_ssl=False):
   """
-  Simple class to verify a url is an ownCloud instance
+  Verify a url is an ownCloud instance
   """
-  http = httplib2.Http(disable_ssl_certificate_validation=True)
+  # TODO: Temporary hack
+  return url
+  # Continues..
+  http = httplib2.Http(disable_ssl_certificate_validation=disable_ssl)
+  # TODO: Needs serious love to make it robust..
   if url.find("remote.php")==-1 and url[-1:] == "/":
     url = url+"remote.php/webdav"
   elif url.find("remote.php") != 1 and url[-1:] != "/":
