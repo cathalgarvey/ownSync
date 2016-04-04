@@ -117,7 +117,7 @@ class ownClient():
     self.log.debug("Deleting Path %s"%(path))
     r, c = self.http.request(self.url+"/"+urllibparse.quote(path), "DELETE")
 
-  def getFile(self, path):
+  def getFile(self, path): #->(bytes)
     """
     getFile retireves the contents of the give file
     """
@@ -203,11 +203,11 @@ class ownClient():
           if newfile in FILES:
             if self.FILES[f]['lastMod'] > FILES[newfile]['lastMod']:
               self.log.info("Downloading Updated file %s"%(f))
-              open("%s/%s"%(path,newfile), "w").write(self.getFile(f))
+              open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
               os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
           else:
             self.log.info("Downloading new file %s"%(f))
-            open("%s/%s"%(path,newfile), "w").write(self.getFile(f))
+            open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
             os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
       self.updateTree(path=base)
 
@@ -284,11 +284,11 @@ class ownClient():
           newfile = fixPath(f[len(base):])
           if newfile not in FILES:
             self.log.info("Creating New file %s"%(f))
-            open("%s/%s"%(path,newfile), "w").write(self.getFile(f))
+            open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
             os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
           elif FILES[newfile]['lastMod'] != self.FILES[f]['lastMod']:
             self.log.info("Downloading Updated file %s"%(f))
-            open("%s/%s"%(path,newfile), "w").write(self.getFile(f))
+            open("%s/%s"%(path,newfile), "wb").write(self.getFile(f))
             os.utime("%s/%s"%(path,newfile), (self.FILES[f]['lastMod']/1000, self.FILES[f]['lastMod']/1000))
 
       for f in FILES:
